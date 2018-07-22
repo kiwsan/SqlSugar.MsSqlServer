@@ -11,28 +11,24 @@ namespace Infrastructure.Factorys
     public class DbFactory : IDbFactory
     {
 
-        SqlSugarClient sqlSugarClient;
+        private SqlSugarClient _sqlSugarClient;
         public SqlSugarClient Init()
         {
-            if (sqlSugarClient != null)
-            {
-                return sqlSugarClient;
-            }
-
-            return new SqlSugarClient(Configure);
+            return _sqlSugarClient ?? (_sqlSugarClient = new SqlSugarClient(Configure));
         }
 
+        private ConnectionConfig _configure;
         private ConnectionConfig Configure
         {
             get
             {
-                return new ConnectionConfig()
+                return _configure ?? (_configure = new ConnectionConfig()
                 {
                     ConnectionString = Constants.ConnectionString,
                     DbType = DbType.SqlServer,
                     IsAutoCloseConnection = true,
                     IsShardSameThread = true
-                };
+                });
             }
         }
 
@@ -53,8 +49,8 @@ namespace Infrastructure.Factorys
         {
             if (!isDisposed && disposing)
             {
-                if (sqlSugarClient != null)
-                    sqlSugarClient.Dispose();
+                if (_sqlSugarClient != null)
+                    _sqlSugarClient.Dispose();
             }
 
             isDisposed = true;
