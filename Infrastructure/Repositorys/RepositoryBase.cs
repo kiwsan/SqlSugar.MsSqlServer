@@ -28,9 +28,14 @@ namespace Infrastructure.Repositorys
         {
             get
             {
-                bool isNewConfig = !string.IsNullOrEmpty(ConnectionString) && DatabaseType.HasValue;
+                bool isOldConfig = false;
+                if (dataContext != null && dataContext.CurrentConnectionConfig != null)
+                {
+                    isOldConfig = dataContext.CurrentConnectionConfig.ConnectionString == ConnectionString && dataContext.CurrentConnectionConfig.DbType == DatabaseType;
+                }
 
-                if (dataContext == null || isNewConfig)
+                bool isNewConfig = !string.IsNullOrEmpty(ConnectionString) && DatabaseType.HasValue;
+                if (dataContext == null || (isNewConfig && !isOldConfig))
                 {
                     return dataContext = DbFactory.Init(ConnectionString, DatabaseType);
                 }
