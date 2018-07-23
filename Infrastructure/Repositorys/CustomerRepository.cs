@@ -1,6 +1,8 @@
-﻿using Domain.Interfaces;
+﻿using Domain;
+using Domain.Interfaces;
 using Domain.Models;
 using Infrastructure.Factorys;
+using SqlSugar;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,8 +18,14 @@ namespace Infrastructure.Repositorys
         {
         }
 
+        protected override string ConnectionString { get; set; }
+        protected override DbType? DatabaseType { get; set; }
+
         public Customer FindByName(string firstName, string lastName)
         {
+            ConnectionString = Constants.ConnectionString;
+            DatabaseType = DbType.SqlServer;
+
             return FindByClause(g => g.FirstName == firstName && g.LastName == lastName);
         }
 

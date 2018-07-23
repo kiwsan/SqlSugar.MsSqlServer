@@ -1,6 +1,7 @@
 ﻿using Domain.Interfaces;
 using Domain.Models;
 using Infrastructure.Factorys;
+using SqlSugar;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,9 @@ namespace Infrastructure.Repositorys
         public OrderRepository(IDbFactory dbFactory) : base(dbFactory)
         {
         }
+
+        protected override string ConnectionString { get; set; }
+        protected override DbType? DatabaseType { get; set; }
 
         public void AddRang(int newCustomerId, IEnumerable<Order> orders)
         {

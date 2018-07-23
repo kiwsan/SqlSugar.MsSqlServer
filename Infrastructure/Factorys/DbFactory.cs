@@ -12,24 +12,21 @@ namespace Infrastructure.Factorys
     {
 
         private SqlSugarClient _sqlSugarClient;
-        public SqlSugarClient Init()
+        public SqlSugarClient Init(string connectionString = "", DbType? databaseType = null)
         {
-            return _sqlSugarClient ?? (_sqlSugarClient = new SqlSugarClient(Configure));
-        }
 
-        private ConnectionConfig _configure;
-        private ConnectionConfig Configure
-        {
-            get
+            //default connection
+            if (string.IsNullOrEmpty(connectionString)) { connectionString = Constants.ConnectionString; }
+            if (!databaseType.HasValue) { databaseType = DbType.SqlServer; }
+
+            var connectionConfig = new ConnectionConfig()
             {
-                return _configure ?? (_configure = new ConnectionConfig()
-                {
-                    ConnectionString = Constants.ConnectionString,
-                    DbType = DbType.SqlServer,
-                    IsAutoCloseConnection = true,
-                    IsShardSameThread = true
-                });
-            }
+                ConnectionString = connectionString,
+                DbType = (DbType)databaseType,
+                IsAutoCloseConnection = true,
+                IsShardSameThread = true
+            };
+            return _sqlSugarClient ?? (_sqlSugarClient = new SqlSugarClient(connectionConfig));
         }
 
         private bool isDisposed;

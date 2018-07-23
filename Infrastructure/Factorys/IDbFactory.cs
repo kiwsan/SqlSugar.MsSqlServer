@@ -1,4 +1,5 @@
-﻿using SqlSugar;
+﻿using Domain;
+using SqlSugar;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Infrastructure.Factorys
     public interface IDbFactory : IDisposable
     {
 
-        SqlSugarClient Init();
+        SqlSugarClient Init(string connectionString = "", DbType? databaseType = null);
 
     }
 }

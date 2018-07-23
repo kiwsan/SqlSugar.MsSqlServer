@@ -14,6 +14,9 @@ namespace Infrastructure.Repositorys
     public abstract class RepositoryBase<T> : IRepository<T> where T : class, new()
     {
 
+        protected abstract string ConnectionString { get; set; }
+        protected abstract DbType? DatabaseType { get; set; }
+
         private SqlSugarClient dataContext;
         protected IDbFactory DbFactory
         {
@@ -23,7 +26,17 @@ namespace Infrastructure.Repositorys
 
         protected SqlSugarClient DbContext
         {
-            get { return dataContext ?? (dataContext = DbFactory.Init()); }
+            get
+            {
+                bool isNewConfig = !string.IsNullOrEmpty(ConnectionString) && DatabaseType.HasValue;
+
+                if (dataContext == null || isNewConfig)
+                {
+                    return dataContext = DbFactory.Init(ConnectionString, DatabaseType);
+                }
+
+                return dataContext;
+            }
         }
 
         protected RepositoryBase(IDbFactory dbFactory)
