@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.Models;
 using UnitTestProject.Startup;
 using ViewModel.Dtos;
 
@@ -16,7 +17,6 @@ namespace UnitTestProject.Repositorys
     [TestFixture]
     public class CustomerRepositoryNUnitTest : NUnitTestBase
     {
-
         [TestCase("Maria", "Anders")]
         public void FindByName_Test(string firstName, string lastName)
         {
@@ -39,7 +39,6 @@ namespace UnitTestProject.Repositorys
         [TestCase(1)]
         public void FindById_Test(int id)
         {
-
             var unitOfWork = _container.Resolve<IUnitOfWork>();
             var customerRepository = _container.Resolve<ICustomerRepository>();
 
@@ -73,7 +72,6 @@ namespace UnitTestProject.Repositorys
         [Test]
         public void AddCustomerAndOrders_Test()
         {
-
             var customerService = _container.Resolve<ICustomerService>();
 
             var objNewOrders = new List<OrderDto>();
@@ -85,7 +83,8 @@ namespace UnitTestProject.Repositorys
             objNewOrders.Add(objNewOrder2);
             objNewOrders.Add(objNewOrder3);
 
-            var objNewCustomerDto = new CustomerDto("Elizabeth3", "Lily3", "Thailand", "Bangkok", "000-855-1252", objNewOrders);
+            var objNewCustomerDto =
+                new CustomerDto("Elizabeth3", "Lily3", "Thailand", "Bangkok", "000-855-1252", objNewOrders);
 
             var objCustomerDto = customerService.Add(objNewCustomerDto);
             Console.WriteLine($"Id: {objCustomerDto.Id}");
@@ -104,5 +103,58 @@ namespace UnitTestProject.Repositorys
             }
         }
 
+        [Test]
+        public async Task GetAllCustomer_Test()
+        {
+            var unitOfWork = _container.Resolve<IUnitOfWork>();
+            var customerRepository = _container.Resolve<ICustomerRepository>();
+
+            //unitOfWork.BeginTransaction();
+
+            try
+            {
+                var objCustomers = customerRepository.FindAll();
+
+                List<Task<TaskOption>> tasks = new List<Task<TaskOption>>();
+                foreach (var customer in objCustomers)
+                {
+                    tasks.Add(Task.Run(() => DoWorkAsync(customer)));
+                }
+
+                var results = await Task.WhenAll(tasks.ToArray());
+
+                foreach (var result in results)
+                {
+                    Console.WriteLine(result.Id);
+                    Console.WriteLine(result.Name);
+                }
+
+                //unitOfWork.CommitTransaction();
+            }
+            catch (Exception ex)
+            {
+                //unitOfWork.RollbackTransaction();
+
+                throw ex;
+            }
+        }
+
+        private async Task<TaskOption> DoWorkAsync(Customer customer)
+        {
+            await Task.Delay(customer.Id);
+
+            foreach (var order in customer.TableOrders)
+            {
+                Console.WriteLine($"Order: {order.OrderDate.ToLongTimeString()}");
+            }
+
+            return new TaskOption {Id = customer.Id, Name = $"{customer.FirstName} {customer.LastName}"};
+        }
+    }
+
+    class TaskOption
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
 }

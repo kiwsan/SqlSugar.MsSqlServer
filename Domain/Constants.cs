@@ -13,7 +13,8 @@ namespace Domain
         {
             get
             {
-                return @"Data Source=KIWSAN\MSSQLSERVER2017;Initial Catalog=SampleDatabase;Integrated Security=True";
+                return @"Server=localhost;Database=developer;User Id=sa;
+Password=Str0ngPassword!;";
             }
         }
 
